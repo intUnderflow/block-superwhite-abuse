@@ -60,9 +60,10 @@ Until it's on the Chrome Web Store:
 3. Enable **Developer mode** (top right).
 4. Click **Load unpacked** and select the repository directory.
 
-To test it, visit the [superwhite demo](https://dtinth.github.io/superwhite/)
-on an HDR display: with the extension enabled, the video renders as ordinary
-white instead of searing your retinas.
+To test it, look at the logo at the top of this README on an HDR display —
+or visit the [superwhite repository](https://github.com/dtinth/superwhite),
+whose README embeds the original HDR video. With the extension enabled, both
+render as ordinary white instead of searing your retinas.
 
 ## Limitations
 
