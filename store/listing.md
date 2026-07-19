@@ -40,10 +40,11 @@ Copy-paste material for the [developer dashboard](https://chrome.google.com/webs
 
 **Language:** English
 
-**Images:**
+**Images** (all are 24-bit RGB PNGs with no alpha, per store requirements):
 - Icon: `icons/icon128.png` (uploaded from the ZIP automatically)
 - Screenshot: `store/screenshot-1280x800-hdr.png`
 - Small promo tile (optional): `store/tile-440x280-hdr.png`
+- Marquee promo tile (optional): `store/marquee-1400x560-hdr.png`
 
 The `-hdr` variants are, naturally, superwhite: the logo glare and the word
 "neutralized." are PQ-encoded at 5000 nits and glow on HDR displays. If the

@@ -10,6 +10,8 @@
     document.documentElement.classList.add('mask');
 </script>
 <style>
+  /* Scale by width on tall canvases, by height on wide ones (marquee). */
+  :root { --u: min(1vw, 1.75vh); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100vw; height: 100vh; overflow: hidden; }
   body {
@@ -21,7 +23,7 @@
     justify-content: center;
     gap: 6vw;
   }
-  .logo-wrap { position: relative; width: 26vw; height: 26vw; flex: none; }
+  .logo-wrap { position: relative; width: calc(26 * var(--u)); height: calc(26 * var(--u)); flex: none; }
   .logo { width: 100%; height: 100%; }
   /* Stand-in for the logo's glare in mask mode: white core fading out at
      the ring's inner edge (the ring itself must stay SDR red). */
@@ -42,7 +44,7 @@
   }
   .copy { max-width: 48vw; }
   h1 {
-    font-size: 5.2vw;
+    font-size: calc(5.2 * var(--u));
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1.08;
@@ -50,16 +52,16 @@
   }
   h1 .white { color: #ffffff; }
   p.tag {
-    font-size: 2.1vw;
+    font-size: calc(2.1 * var(--u));
     line-height: 1.45;
     color: #b8bdc7;
     margin-bottom: 3.2vh;
   }
   ul { list-style: none; }
   li {
-    font-size: 1.7vw;
+    font-size: calc(1.7 * var(--u));
     color: #d8dbe0;
-    padding-left: 2.4vw;
+    padding-left: calc(2.4 * var(--u));
     position: relative;
     margin-bottom: 1.4vh;
   }
@@ -67,7 +69,7 @@
     content: "";
     position: absolute;
     left: 0; top: 0.55em;
-    width: 1.1vw; height: 1.1vw;
+    width: calc(1.1 * var(--u)); height: calc(1.1 * var(--u));
     border-radius: 50%;
     background: #cc2028;
   }

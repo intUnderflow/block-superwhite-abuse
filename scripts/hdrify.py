@@ -5,15 +5,19 @@ Takes two same-sized PNGs: the base image, and a matte that is white
 wherever content should glow (soft gray edges blend). The base is encoded
 with SDR white at the 203-nit HDR reference; matte-white regions have
 their luminance scaled up to 5000 nits — superwhite's own peak. Output is
-a 16-bit RGB PNG with a cICP chunk (BT.2020 primaries, PQ transfer,
-9/16/0/1).
+an RGB (no alpha) PNG with a cICP chunk (BT.2020 primaries, PQ transfer,
+9/16/0/1), 16-bit by default or 24-bit ("8") for Chrome Web Store promo
+images, which require JPEG or 24-bit PNG. The 8-bit path applies seeded
+triangular dither, since PQ at 8 bits would otherwise band in the dark
+gradient.
 
 Decoding the input PNGs is delegated to ffmpeg; everything else is
 standard library.
 
-Usage: python3 scripts/hdrify.py base.png matte.png out.png
+Usage: python3 scripts/hdrify.py base.png matte.png out.png [8|16]
 """
 
+import random
 import struct
 import subprocess
 import sys
@@ -77,8 +81,9 @@ def pq_fast(nits):
     return PQ_LUT[i] * (1 - frac) + PQ_LUT[i + 1] * frac
 
 
-def hdrify(base, matte, width, height):
+def hdrify(base, matte, width, height, bits):
     gain = BOOST_NITS / SDR_WHITE_NITS - 1
+    rng = random.Random(0)  # seeded: builds are reproducible
     out = bytearray()
     row_len = width * 3
     for y in range(height):
@@ -95,11 +100,16 @@ def hdrify(base, matte, width, height):
                 nits = SDR_WHITE_NITS * boost * (
                     m[0] * r + m[1] * g + m[2] * b
                 )
-                out += struct.pack(">H", round(pq_fast(nits) * 65535))
+                pq = pq_fast(nits)
+                if bits == 8:
+                    q = pq * 255 + rng.random() + rng.random() - 1
+                    out.append(max(0, min(255, round(q))))
+                else:
+                    out += struct.pack(">H", round(pq * 65535))
     return bytes(out)
 
 
-def write_png(path, width, height, raw):
+def write_png(path, width, height, raw, bits):
     def chunk(tag, data):
         payload = tag + data
         return (
@@ -108,7 +118,7 @@ def write_png(path, width, height, raw):
             + struct.pack(">I", zlib.crc32(payload))
         )
 
-    ihdr = struct.pack(">IIBBBBB", width, height, 16, 2, 0, 0, 0)  # 16-bit RGB
+    ihdr = struct.pack(">IIBBBBB", width, height, bits, 2, 0, 0, 0)  # RGB
     cicp = bytes([9, 16, 0, 1])  # BT.2020 primaries, PQ, RGB, full range
     with open(path, "wb") as f:
         f.write(b"\x89PNG\r\n\x1a\n")
@@ -120,11 +130,14 @@ def write_png(path, width, height, raw):
 
 def main():
     base_path, matte_path, out_path = sys.argv[1:4]
+    bits = int(sys.argv[4]) if len(sys.argv) > 4 else 16
+    assert bits in (8, 16), "bits must be 8 or 16"
     width, height = png_size(base_path)
     assert (width, height) == png_size(matte_path), "size mismatch"
     base, matte = decode_rgb(base_path), decode_rgb(matte_path)
-    write_png(out_path, width, height, hdrify(base, matte, width, height))
-    print(f"wrote {out_path} ({width}x{height})")
+    raw = hdrify(base, matte, width, height, bits)
+    write_png(out_path, width, height, raw, bits)
+    print(f"wrote {out_path} ({width}x{height}, {bits}-bit)")
 
 
 if __name__ == "__main__":
