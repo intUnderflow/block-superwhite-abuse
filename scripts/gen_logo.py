@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the README logo as a genuine "superwhite" HDR PNG.
+"""Generate the superwhite HDR logo PNGs.
 
 Yes, really. The red prohibition sign is encoded at normal SDR brightness
 (203-nit HDR reference white, ITU-R BT.2408), while the white glare behind
@@ -8,10 +8,13 @@ uses. On an HDR display the logo does exactly the thing this extension
 blocks; install the extension and it renders as ordinary white. The logo
 is its own demo.
 
-The output is a PNG Third Edition HDR PNG: 16-bit RGBA with a cICP chunk
+Outputs are PNG Third Edition HDR PNGs: 16-bit RGBA with a cICP chunk
 declaring BT.2020 primaries / PQ transfer / full-range RGB (9/16/0/1),
-supported by current Chrome, Firefox and Safari. SDR displays tone-map it
-to a normal-looking logo.
+supported by current Chrome, Firefox and Safari. SDR displays tone-map
+them to a normal-looking logo.
+
+Emits the 512px README logo and a 128px icon-sized variant. The manifest
+deliberately keeps the SDR icons (Chrome composites its own UI in SDR).
 
 Pure standard library — no Pillow, no ffmpeg.
 
@@ -23,7 +26,10 @@ import os
 import struct
 import zlib
 
-SIZE = 512
+OUTPUTS = [
+    (512, "logo-superwhite.png"),
+    (128, "icon128-superwhite.png"),
+]
 SS = 2  # supersampling factor
 
 RED_SRGB = (204 / 255, 32 / 255, 40 / 255)
@@ -60,9 +66,9 @@ def smoothstep(edge0, edge1, x):
     return t * t * (3 - 2 * t)
 
 
-def render():
+def render(size):
     """Render premultiplied linear BT.2020 RGB in absolute nits, plus alpha."""
-    n = SIZE * SS
+    n = size * SS
     c = (n - 1) / 2.0
     ring_outer = 0.46 * n
     ring_thickness = 0.13 * n
@@ -100,11 +106,11 @@ def render():
     return buf
 
 
-def encode_scanlines(buf):
+def encode_scanlines(buf, size):
     out = bytearray()
-    for py in range(SIZE):
+    for py in range(size):
         out.append(0)  # PNG filter type: None
-        for px in range(SIZE):
+        for px in range(size):
             r = g = b = a = 0.0
             for sy in range(SS):
                 for sx in range(SS):
@@ -121,7 +127,7 @@ def encode_scanlines(buf):
     return bytes(out)
 
 
-def write_png(path, raw):
+def write_png(path, size, raw):
     def chunk(tag, data):
         payload = tag + data
         return (
@@ -130,7 +136,7 @@ def write_png(path, raw):
             + struct.pack(">I", zlib.crc32(payload))
         )
 
-    ihdr = struct.pack(">IIBBBBB", SIZE, SIZE, 16, 6, 0, 0, 0)  # 16-bit RGBA
+    ihdr = struct.pack(">IIBBBBB", size, size, 16, 6, 0, 0, 0)  # 16-bit RGBA
     cicp = bytes([9, 16, 0, 1])  # BT.2020 primaries, PQ, RGB, full range
     with open(path, "wb") as f:
         f.write(b"\x89PNG\r\n\x1a\n")
@@ -143,11 +149,11 @@ def write_png(path, raw):
 def main():
     print(f"glare  : {GLARE_NITS:.0f} nits -> PQ {pq_encode(GLARE_NITS):.4f}")
     print(f"SDR ref: {SDR_WHITE_NITS:.0f} nits -> PQ {pq_encode(SDR_WHITE_NITS):.4f}")
-    path = os.path.join(
-        os.path.dirname(__file__), "..", "icons", "logo-superwhite.png"
-    )
-    write_png(path, encode_scanlines(render()))
-    print(f"wrote {os.path.relpath(path)}")
+    icons_dir = os.path.join(os.path.dirname(__file__), "..", "icons")
+    for size, name in OUTPUTS:
+        path = os.path.join(icons_dir, name)
+        write_png(path, size, encode_scanlines(render(size), size))
+        print(f"wrote {os.path.relpath(path)}")
 
 
 if __name__ == "__main__":
