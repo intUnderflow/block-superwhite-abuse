@@ -53,7 +53,12 @@ collects nothing, phones home to nothing, and has no runtime behavior at all.
 
 ## Install
 
-Until it's on the Chrome Web Store:
+**From the Chrome Web Store:**
+[Block Superwhite Abuse](https://chromewebstore.google.com/detail/block-superwhite-abuse/icgaohmdaiamelgkcbljioombconcmfl)
+*(pending review — this link goes live once Google approves the first
+version)*.
+
+**From source:**
 
 1. Clone this repository.
 2. Open `chrome://extensions`.

@@ -2,6 +2,9 @@
 
 Copy-paste material for the [developer dashboard](https://chrome.google.com/webstore/devconsole).
 
+- **Item ID:** `icgaohmdaiamelgkcbljioombconcmfl`
+- **Listing URL:** https://chromewebstore.google.com/detail/block-superwhite-abuse/icgaohmdaiamelgkcbljioombconcmfl
+
 ## Store listing
 
 **Name:** Block Superwhite Abuse
