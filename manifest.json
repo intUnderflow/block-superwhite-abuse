@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Block Superwhite Abuse",
+  "version": "1.0.0",
+  "description": "Clamps HDR page content to standard brightness, neutralizing blinding 'superwhite' avatars, images and videos on HDR displays.",
+  "homepage_url": "https://github.com/intUnderflow/block-superwhite-abuse",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["content/clamp.css"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_origin_as_fallback": true
+    }
+  ]
+}

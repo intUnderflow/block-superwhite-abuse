@@ -1,0 +1,36 @@
+/*
+ * Neutralizes "superwhite" HDR abuse (https://github.com/dtinth/superwhite):
+ * tiny HDR videos (HEVC 10-bit PQ, up to 5000 nits) and HDR AVIF images
+ * crafted to render far brighter than the page's white, typically uploaded
+ * as profile pictures.
+ *
+ * dynamic-range-limit: standard (Chrome 136+) caps an element's luminance
+ * at HDR reference white, so SDR content is completely unaffected while
+ * HDR content is tone-mapped down to normal brightness.
+ *
+ * The property is inherited, so the :root rule flows into shadow DOM trees
+ * (Reddit, YouTube, etc. use these heavily), which extension stylesheets
+ * cannot otherwise reach.
+ */
+:root {
+  dynamic-range-limit: standard !important;
+}
+
+/* Also defeats page rules that opt specific elements back into HDR
+   (e.g. a gallery site setting no-limit on its images). */
+* {
+  dynamic-range-limit: standard !important;
+}
+
+/* Chrome < 136 fallback: applying a no-op filter forces HDR media through
+   the SDR rendering path, clamping its brightness. Deliberately not
+   !important so pages that genuinely style media with filters still win. */
+@supports not (dynamic-range-limit: standard) {
+  img,
+  video,
+  picture,
+  object,
+  embed {
+    filter: brightness(1);
+  }
+}

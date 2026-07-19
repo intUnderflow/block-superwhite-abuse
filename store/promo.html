@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script>
+  // ?mask renders the "superwhite matte": white where the HDR boost goes,
+  // black everywhere else. scripts/gen_store_assets.sh captures both modes
+  // and scripts/hdrify.py combines them into an HDR (PQ cICP) PNG.
+  if (location.search.includes('mask'))
+    document.documentElement.classList.add('mask');
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100vw; height: 100vh; overflow: hidden; }
+  body {
+    background: radial-gradient(120vw 90vh at 50% -20%, #232733, #14161c 70%);
+    color: #f2f3f5;
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6vw;
+  }
+  .logo-wrap { position: relative; width: 26vw; height: 26vw; flex: none; }
+  .logo { width: 100%; height: 100%; }
+  /* Stand-in for the logo's glare in mask mode: white core fading out at
+     the ring's inner edge (the ring itself must stay SDR red). */
+  .glare-mask {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(closest-side, #fff 40%, #000 66%);
+  }
+  /* The sign's diagonal bar stays SDR red, so black it out of the matte. */
+  .bar-mask {
+    display: none;
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 141%; height: 13%;
+    background: #000;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .copy { max-width: 48vw; }
+  h1 {
+    font-size: 5.2vw;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    margin-bottom: 2.2vh;
+  }
+  h1 .white { color: #ffffff; }
+  p.tag {
+    font-size: 2.1vw;
+    line-height: 1.45;
+    color: #b8bdc7;
+    margin-bottom: 3.2vh;
+  }
+  ul { list-style: none; }
+  li {
+    font-size: 1.7vw;
+    color: #d8dbe0;
+    padding-left: 2.4vw;
+    position: relative;
+    margin-bottom: 1.4vh;
+  }
+  li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0.55em;
+    width: 1.1vw; height: 1.1vw;
+    border-radius: 50%;
+    background: #cc2028;
+  }
+
+  /* Superwhite matte: only the glare and "neutralized." get boosted. */
+  .mask body { background: #000; }
+  .mask .logo { opacity: 0; }
+  .mask .glare-mask { display: block; }
+  .mask .bar-mask { display: block; }
+  .mask h1, .mask p.tag, .mask li { color: #000; }
+  .mask li::before { background: #000; }
+  .mask h1 .white { color: #fff; }
+</style>
+</head>
+<body>
+  <div class="logo-wrap">
+    <img class="logo" src="../icons/logo-superwhite.png" alt="">
+    <div class="glare-mask"></div>
+    <div class="bar-mask"></div>
+  </div>
+  <div class="copy">
+    <h1>Blinding HDR avatars,<br><span class="white">neutralized.</span></h1>
+    <p class="tag">Clamps every page to standard brightness, blocking
+    &ldquo;superwhite&rdquo; profile pictures and videos that abuse HDR displays.</p>
+    <ul>
+      <li>Normal images are pixel-for-pixel unaffected</li>
+      <li>No JavaScript &mdash; a single static stylesheet</li>
+      <li>Collects nothing, contacts nothing</li>
+    </ul>
+  </div>
+</body>
+</html>
